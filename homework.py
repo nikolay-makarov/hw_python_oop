@@ -1,3 +1,6 @@
+"""Программный модуль фитнес-трекера.
+Модуль рассчитывает и отображает результаты тренировки
+"""
 from __future__ import annotations
 from typing import Callable
 
@@ -89,7 +92,6 @@ class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
     height: float
     calories: float
-    height: float
 
     def __init__(self,
                  action: int,
