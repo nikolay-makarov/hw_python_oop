@@ -16,7 +16,7 @@ class InfoMessage:
 
     def get_message(self) -> str:
         """Вывести текст сообщения о тренировке."""
-        return (f'Тип тренировки: {self.training_type}; ' 
+        return (f'Тип тренировки: {self.training_type}; '
                 f'Длительность: {self.duration:.3f} ч.; '
                 f'Дистанция: {self.distance:.3f} км; '
                 f'Ср. скорость: {self.speed:.3f} км/ч; '
@@ -62,7 +62,7 @@ class Running(Training):
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
         return ((self.MULTIPLYING_COEFFICIENT * self.get_mean_speed()
-                - self.SUBTRACTING_COEFFICIENT) * self.weight
+                 - self.SUBTRACTING_COEFFICIENT) * self.weight
                 / self.M_IN_KM) * self.duration * self.MIN_IN_HOUR
 
 
@@ -84,8 +84,8 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
         return ((self.WEIGHT_COEFFICIENT * self.weight
-                + (self.get_mean_speed() ** 2 // self.height)
-                * self.SPEED_PER_HEIGHT_COEFFICIENT * self.weight)
+                 + (self.get_mean_speed() ** 2 // self.height)
+                 * self.SPEED_PER_HEIGHT_COEFFICIENT * self.weight)
                 * self.duration * self.MIN_IN_HOUR)
 
 
@@ -113,7 +113,6 @@ class Swimming(Training):
                 / self.M_IN_KM) / self.duration
 
     def get_spent_calories(self) -> float:
-
         return ((self.get_mean_speed() + self.SPEED_COEFFICIENT)
                 * self.WEIGHT_COEFFICIENT * self.weight)
 
@@ -125,7 +124,8 @@ TYPES_OF_TRAINING: Dict[str, Type[Training]] = {
 }
 
 
-def read_package(type_of_training: str, measured_data: List[int]) -> Optional[Training]:
+def read_package(type_of_training: str,
+                 measured_data: List[int]) -> Optional[Training]:
     """Прочитать данные полученные от датчиков."""
     if type_of_training not in TYPES_OF_TRAINING:
         print('Передан неверный тип тренировки.')
