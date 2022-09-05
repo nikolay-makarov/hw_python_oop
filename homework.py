@@ -1,7 +1,7 @@
 """Программный модуль фитнес-трекера.
 Модуль рассчитывает и отображает результаты тренировки.
 """
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from typing import ClassVar, Dict, List, Tuple, Type
 
 
@@ -44,8 +44,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        raise NotImplementedError(f'Дочерний метод класса '
-                                  f'{type(self).__name__} не переопределен')
+        raise NotImplementedError('Дочерний метод класса не переопределен')
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -56,10 +55,11 @@ class Training:
                            self.get_spent_calories())
 
 
+@dataclass
 class Running(Training):
     """Тренировка: бег."""
-    MULTIPLYING_COEFFICIENT: int = 18
-    SUBTRACTING_COEFFICIENT: int = 20
+    MULTIPLYING_COEFFICIENT: ClassVar[int] = 18
+    SUBTRACTING_COEFFICIENT: ClassVar[int] = 20
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
@@ -101,22 +101,22 @@ class Swimming(Training):
                 * self.WEIGHT_COEFFICIENT * self.weight)
 
 
-TYPES_OF_TRAINING: Dict[str, Tuple[Type[Training], int]] = {
-    'SWM': (Swimming, 5),
-    'RUN': (Running, 3),
-    'WLK': (SportsWalking, 4)
+TYPES_OF_TRAINING: Dict[str, Type[Training]] = {
+    'SWM': Swimming,
+    'RUN': Running,
+    'WLK': SportsWalking
 }
 
 
 def read_package(type_of_training: str,
-                 measured_data: List[int]) -> Training:
+                 measure: List[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
     if type_of_training not in TYPES_OF_TRAINING:
         raise KeyError('Передан неверный тип тренировки')
-    elif TYPES_OF_TRAINING[type_of_training][1] != len(measured_data):
+    if len([field.name for field in
+            fields(TYPES_OF_TRAINING[type_of_training])]) != len(measure):
         raise TypeError('Передано неверное количество данных')
-    else:
-        return TYPES_OF_TRAINING[type_of_training][0](*measured_data)
+    return TYPES_OF_TRAINING[type_of_training](*measure)
 
 
 def main(activity: Training) -> None:
