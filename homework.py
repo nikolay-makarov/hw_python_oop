@@ -33,6 +33,7 @@ class Training:
     LEN_STEP: ClassVar[float] = 0.65
     MIN_IN_HOUR: ClassVar[int] = 60
     M_IN_KM: ClassVar[int] = 1000
+    ERROR_MESSAGE: ClassVar[str] = 'Дочерний метод класса не переопределен'
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -44,7 +45,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        raise NotImplementedError('Дочерний метод класса не переопределен')
+        raise NotImplementedError(self.ERROR_MESSAGE)
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -58,13 +59,13 @@ class Training:
 @dataclass
 class Running(Training):
     """Тренировка: бег."""
-    MULTIPLYING_COEFFICIENT: ClassVar[int] = 18
-    SUBTRACTING_COEFFICIENT: ClassVar[int] = 20
+    MULTIPLY: ClassVar[int] = 18
+    SUBTRACT: ClassVar[int] = 20
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        return ((self.MULTIPLYING_COEFFICIENT * self.get_mean_speed()
-                 - self.SUBTRACTING_COEFFICIENT) * self.weight
+        return ((self.MULTIPLY * self.get_mean_speed()
+                 - self.SUBTRACT) * self.weight
                 / self.M_IN_KM) * self.duration * self.MIN_IN_HOUR
 
 
@@ -72,14 +73,14 @@ class Running(Training):
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
     height: float
-    SPEED_PER_HEIGHT_COEFFICIENT: ClassVar[float] = 0.029
-    WEIGHT_COEFFICIENT: ClassVar[float] = 0.035
+    SPEED_PER_HEIGHT: ClassVar[float] = 0.029
+    WEIGHT_COEFF: ClassVar[float] = 0.035
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        return ((self.WEIGHT_COEFFICIENT * self.weight
+        return ((self.WEIGHT_COEFF * self.weight
                  + (self.get_mean_speed() ** 2 // self.height)
-                 * self.SPEED_PER_HEIGHT_COEFFICIENT * self.weight)
+                 * self.SPEED_PER_HEIGHT * self.weight)
                 * self.duration * self.MIN_IN_HOUR)
 
 
@@ -89,34 +90,36 @@ class Swimming(Training):
     length_pool: float
     count_pool: int
     LEN_STEP: ClassVar[float] = 1.38
-    SPEED_COEFFICIENT: ClassVar[float] = 1.1
-    WEIGHT_COEFFICIENT: ClassVar[int] = 2
+    SPEED_COEFF: ClassVar[float] = 1.1
+    WEIGHT_COEFF: ClassVar[int] = 2
 
     def get_mean_speed(self) -> float:
         return (self.length_pool * self.count_pool
                 / self.M_IN_KM) / self.duration
 
     def get_spent_calories(self) -> float:
-        return ((self.get_mean_speed() + self.SPEED_COEFFICIENT)
-                * self.WEIGHT_COEFFICIENT * self.weight)
+        return ((self.get_mean_speed() + self.SPEED_COEFF)
+                * self.WEIGHT_COEFF * self.weight)
 
 
 TYPES_OF_TRAINING: Dict[str, Type[Training]] = {
     'SWM': Swimming,
     'RUN': Running,
-    'WLK': SportsWalking
+    'WLK': SportsWalking,
 }
+VALUE_ERROR_MESSAGE: str = 'Передан неверный тип тренировки'
+TYPE_ERROR_MESSAGE: str = 'Передано неверное количество данных'
 
 
 def read_package(type_of_training: str,
                  measure: List[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
     if type_of_training not in TYPES_OF_TRAINING:
-        raise KeyError('Передан неверный тип тренировки')
-    if len([field.name for field in
-            fields(TYPES_OF_TRAINING[type_of_training])]) != len(measure):
-        raise TypeError('Передано неверное количество данных')
-    return TYPES_OF_TRAINING[type_of_training](*measure)
+        raise ValueError(VALUE_ERROR_MESSAGE)
+    activity: Type[Training] = TYPES_OF_TRAINING[type_of_training]
+    if len(fields(activity)) != len(measure):
+        raise TypeError(TYPE_ERROR_MESSAGE)
+    return activity(*measure)
 
 
 def main(activity: Training) -> None:
